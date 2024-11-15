@@ -1,59 +1,105 @@
-import { useForm } from "react-hook-form";
-import Button from "../../components/Button";
-import Input from "../../components/Input";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
+import React, { useState } from 'react';
 
-import { Container, LoginContainer, Column, Spacing, Title } from "./styles";
-import { defaultValues, IFormLogin } from "./types";
+// Definindo os tipos para o estado do formulário
+interface FormData {
+  email: string;
+  password: string;
+}
 
-const schema = yup
-  .object({
-    email: yup.string().email("E-mail inválido").required("Campo obrigatório"),
-    password: yup
-      .string()
-      .min(6, "No minimo 6 caracteres")
-      .required("Campo obrigatório"),
-  })
-  .required();
+const LoginForm: React.FC = () => {
+  // Estado do formulário
+  const [formData, setFormData] = useState<FormData>({ email: '', password: '' });
+  const [error, setError] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
-const Login = () => {
-  const {
-    control,
-    formState: { errors, isValid },
-  } = useForm<IFormLogin>({
-    resolver: yupResolver(schema),
-    mode: "onBlur",
-    defaultValues,
-    reValidateMode: "onChange",
-  });
+  // Função para lidar com a mudança de valores nos campos do formulário
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  // Função de validação do formulário
+  const validateForm = (): boolean => {
+    if (!formData.email || !formData.password) {
+      setError('Todos os campos são obrigatórios.');
+      return false;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setError('Por favor, insira um email válido.');
+      return false;
+    }
+
+    if (formData.password.length < 6) {
+      setError('A senha deve ter no mínimo 6 caracteres.');
+      return false;
+    }
+
+    setError('');
+    return true;
+  };
+
+  // Função de login (simulação de autenticação)
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!validateForm()) return;
+
+    setIsLoading(true);
+    setError('');
+
+    // Simulação de autenticação (substitua com lógica real)
+    setTimeout(() => {
+      if (formData.email === 'user@example.com' && formData.password === 'password123') {
+        setIsAuthenticated(true);
+        alert('Login realizado com sucesso!');
+      } else {
+        setError('Credenciais inválidas.');
+      }
+      setIsLoading(false);
+    }, 1000); // Simula um delay de autenticação
+  };
 
   return (
-    <Container>
-      <LoginContainer>
-        <Column>
-          <Title>Login</Title>
-          <Spacing />
-          <Input
+    <div className="login-container">
+      <h2>Login</h2>
+      {isAuthenticated && <p>Bem-vindo de volta!</p>}
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label htmlFor="email">Email:</label>
+          <input
+            type="email"
+            id="email"
             name="email"
-            placeholder="Email"
-            control={control}
-            errorMessage={errors?.email?.message}
+            value={formData.email}
+            onChange={handleChange}
+            required
           />
-          <Spacing />
-          <Input
-            name="password"
+        </div>
+        <div>
+          <label htmlFor="password">Senha:</label>
+          <input
             type="password"
-            placeholder="Senha"
-            control={control}
-            errorMessage={errors?.password?.message}
+            id="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            required
           />
-          <Spacing />
-          <Button title="Entrar" />
-        </Column>
-      </LoginContainer>
-    </Container>
+        </div>
+        {error && <p className="error-message">{error}</p>}
+        <button type="submit" disabled={isLoading}>
+          {isLoading ? 'Carregando...' : 'Entrar'}
+        </button>
+      </form>
+    </div>
   );
 };
 
-export default Login;
+export default LoginForm;
+

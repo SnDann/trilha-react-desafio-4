@@ -3,6 +3,7 @@ import { IInputProps } from "././types";
 import { Controller } from "react-hook-form";
 
 const Input = ({ control, name, errorMessage, ...rest }: IInputProps) => {
+  console.log('tem erro', errorMessage, name);
   return (
     <>
       <InputContainer>
@@ -19,9 +20,9 @@ const Input = ({ control, name, errorMessage, ...rest }: IInputProps) => {
             />
           )}
         />
-      </InputContainer>
+        </InputContainer>
       {errorMessage ? <ErrorMessage>{errorMessage}</ErrorMessage> : null}
-    </>
+      </>
   );
 };
 
